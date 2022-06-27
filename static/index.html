@@ -1,0 +1,88 @@
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<!--    <script src="/static/Chart.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<!--    <script src="/static/chartjs-adapter-date-fns.bundle.min.js"></script>-->
+    <script>
+        var SENSOR_ID_TO_COLOR = {
+            1:"orange",
+            2:"blue",
+            3:"green",
+            4:"pink"
+        }
+
+        function tupleToDataPair(tuple) {
+            var date = new Date(tuple[1]*1000).toISOString() // Date takes in millis since epoch, but server returns seconds
+            return {t:date,y:tuple[3],sensor:tuple[2]}
+        }
+
+        function dataPairsToDatasets(dataPairs) {
+            // Do a group by on the sensor id
+            const graphEntries = new Map();
+            dataPairs.forEach((item) => {
+                 const key = item.sensor;
+                 const collection = graphEntries.get(key);
+                 if (!collection) {
+                     graphEntries.set(key,
+                     {
+                         data: [item],
+                         borderColor: SENSOR_ID_TO_COLOR[key] || "yellow",
+                         fill: false
+                     });
+                 } else {
+                     collection.data.push(item);
+                 }
+            })
+
+            return Array.from(graphEntries.values())
+        }
+
+        function renderGraph(datasets) {
+            var end = new Date()
+            var start = new Date(end - (5*86400000)) // subtract 5 days from current time
+
+            new Chart("myChart", {
+              type: "line",
+              data: {
+                datasets: datasets
+              },
+              options: {
+                legend: {display: false},
+                scales: {
+                  xAxes: [{
+                    type: 'time',
+                    distribution: 'linear',
+                    time: {
+                        unit: "hour"
+                    },
+                    ticks : {
+                        min: start,
+                        max: end,
+                    }
+                 }]
+                }
+              }
+            });
+        }
+
+        function getData() {
+            fetch('http://127.0.0.1:5000/reports').then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                // This is the JSON from our response
+                var sensorReports = dataPairsToDatasets(data.reports.map(tupleToDataPair));
+                console.log(sensorReports)
+                renderGraph(sensorReports)
+            }).catch(function (err) {
+                // There was an error
+                console.warn('Something went wrong.', err);
+            });
+        }
+    </script>
+
+</head>
+<body onload="getData()">
+<canvas id="myChart" style="width:80%;max-width:500px"></canvas>
+</body>
+</html>
