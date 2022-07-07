@@ -5,7 +5,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <!--    <script src="/static/chartjs-adapter-date-fns.bundle.min.js"></script>-->
     <script>
-	var re = /\?duration=([0-9]+)/
+	var re = /\?duration=([0-9.]+)/
 
         var SENSOR_ID_TO_COLOR = {
             1:"orange",
@@ -42,7 +42,12 @@
         }
 
 	function getDurationFromUrl() {
-	    return parseInt(re.exec(window.location.href)?.[1])
+	    var parsedUrl = re.exec(window.location.href)
+            if(parsedUrl != null) {
+                return parseFloat(parsedUrl[1])
+            } else {
+                return NaN
+            }
 	}
 
         function renderGraph(datasets) {
@@ -106,8 +111,8 @@
 </div>
 <div style="position: relative; width:80vw;margin-left:auto;margin-right:auto;margin-top:20px;">
 <form action="/">
-  <label for="duration">Duration</label><br>
-  <input type="text" id="duration" name="duration" value="5"><br>
+  <label for="duration">Duration (in days)</label><br>
+  <input type="text" id="duration" name="duration"><br>
   <input type="submit" value="Submit">
 </form> 
 </div>
