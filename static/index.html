@@ -5,6 +5,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <!--    <script src="/static/chartjs-adapter-date-fns.bundle.min.js"></script>-->
     <script>
+	var re = /\?duration=([0-9]+)/
+
         var SENSOR_ID_TO_COLOR = {
             1:"orange",
             2:"blue",
@@ -27,6 +29,7 @@
                      graphEntries.set(key,
                      {
                          data: [item],
+                         pointRadius: 0,
                          borderColor: SENSOR_ID_TO_COLOR[key] || "yellow",
                          fill: false
                      });
@@ -38,9 +41,18 @@
             return Array.from(graphEntries.values())
         }
 
+	function getDurationFromUrl() {
+	    return parseInt(re.exec(window.location.href)?.[1])
+	}
+
         function renderGraph(datasets) {
             var end = new Date()
-            var start = new Date(end - (5*86400000)) // subtract 5 days from current time
+	    
+	    var durationFromUrl = getDurationFromUrl()
+	    var duration = durationFromUrl != NaN ? durationFromUrl : 5 // Default to 5 days if parsing failed
+	    console.log("Duration:" + duration)
+            
+	    var start = new Date(end - (duration*86400000)) // subtract 5 days from current time
 
             new Chart("myChart", {
               type: "line",
@@ -48,6 +60,7 @@
                 datasets: datasets
               },
               options: {
+		responsive: true,
                 legend: {display: false},
                 scales: {
                   xAxes: [{
@@ -60,6 +73,11 @@
                         min: start,
                         max: end,
                     }
+                 }],
+                 yAxes: [{
+                     ticks : {
+                        min: 70,
+                    }
                  }]
                 }
               }
@@ -67,7 +85,7 @@
         }
 
         function getData() {
-            fetch('http://127.0.0.1:5000/reports').then(function (response) {
+            fetch('/reports').then(function (response) {
                 return response.json();
             }).then(function (data) {
                 // This is the JSON from our response
@@ -83,6 +101,15 @@
 
 </head>
 <body onload="getData()">
-<canvas id="myChart" style="width:80%;max-width:500px"></canvas>
+<div class="chart-container" style="position: relative; width:80vw;margin-left:auto;margin-right:auto;">
+<canvas id="myChart"></canvas>
+</div>
+<div style="position: relative; width:80vw;margin-left:auto;margin-right:auto;margin-top:20px;">
+<form action="/">
+  <label for="duration">Duration</label><br>
+  <input type="text" id="duration" name="duration" value="5"><br>
+  <input type="submit" value="Submit">
+</form> 
+</div>
 </body>
 </html>
