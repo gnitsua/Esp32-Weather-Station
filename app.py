@@ -80,9 +80,12 @@ def report():
 # The reports endpoint will return all points by default, but the scope can be limited to a timeframe by supplying "start" and "end" in epoch time
 @app.route('/reports', methods=['GET'])
 def reports():
-    start = request.args.get('start', get_key(0, 0))  # When no start is provided default to 0 (which is 01/01/1970)
-    end = request.args.get('end', get_key(int(time.time()), 9))  # When no end is provided default to current time
-    reports = query_db('select * from reports where id >= ? and id <= ?', [start, end])
+    start = request.args.get('start', default=0, type=int)  # When no start is provided default to 0 (which is 01/01/1970)
+    end = request.args.get('end', int(time.time()), type=int)  # When no end is provided default to current time
+    start_key = start * 10 # Add our key padding
+    end_key = end * 10 + 9
+
+    reports = query_db('select * from reports where id >= ? and id <= ?', [start_key, end_key])
     return {"reports": reports}
 
 

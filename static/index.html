@@ -41,10 +41,10 @@
             return Array.from(graphEntries.values())
         }
 
-	function getDurationFromUrl() {
+	function getStartFromUrl() {
 	    var parsedUrl = re.exec(window.location.href)
             if(parsedUrl != null) {
-                return parseFloat(parsedUrl[1])
+                return new Date((new Date())-parseFloat(parsedUrl[1])*86400000)
             } else {
                 return NaN
             }
@@ -53,12 +53,10 @@
         function renderGraph(datasets) {
             var end = new Date()
 	    
-	    var durationFromUrl = getDurationFromUrl()
-	    var duration = durationFromUrl != NaN ? durationFromUrl : 5 // Default to 5 days if parsing failed
-	    console.log("Duration:" + duration)
+	    var startFromUrl = getStartFromUrl()
+	    var start = startFromUrl != NaN ? startFromUrl : 5 // Default to 5 days if parsing failed
+	    console.log("Start:" + start)
             
-	    var start = new Date(end - (duration*86400000)) // subtract 5 days from current time
-
             new Chart("myChart", {
               type: "line",
               data: {
@@ -90,7 +88,9 @@
         }
 
         function getData() {
-            fetch('/reports').then(function (response) {
+            var startTime = parseInt(getStartFromUrl().getTime() / 1000) // Need to convert from millis to seconds
+            var endpoint = '/reports?' + new URLSearchParams({"start":startTime}).toString()
+            fetch(endpoint).then(function (response) {
                 return response.json();
             }).then(function (data) {
                 // This is the JSON from our response
