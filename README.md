@@ -11,6 +11,8 @@ The system will collect weather "reports" which contain temperature and humidity
 
 The overall system diagram is as follows:
 
+![system architecture](/documentation/img.png)
+
 ## Parts
 ### Server
 - [Raspberry Pi Model B+](https://www.adafruit.com/product/1914): I am not using the exact model, it shouldn't matter that much
