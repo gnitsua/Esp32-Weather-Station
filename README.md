@@ -50,6 +50,45 @@ Next  we need to make is our primary key. Honestly we could probably just go wit
 For retreiving the data, we are going to use `/reports`. We don't need much functionality here, so our only parameters are going to be `start` and `end`.
 This will allow us to grab parts of our data
 
+##User Interface
+I wanted to make UI as simple as possible (mostly because I didn't want to spend a million hours on it), so no fancy frameworks here. I found [ChartJS](https://www.chartjs.org/) which is actually an extremely pleasant graph library that made it really fast to get up and running.
+
+Because our API is so general, we do most of our wrangling on the frontend. We start out by fetching the data in `getData()`. There is a bit of extra logic here to allow us to pull start times from the url.
+This allows us to resize the graph either by changing the URL or with a simple HTML form.
+The majority of the marshalling is done in `datasetToDataPairs()` which converts the raw values that we get from the server into the format that ChartJs expects. It's useful to do this sort of conversion on the frontend in general because it means that if we ever want to switch chart libaries we don't need to update the backend.
+
+I followed the example from [these docs](https://www.chartjs.org/docs/latest/charts/line.html) to get the correct format for the structure. Start out with the following
+
+```
+{
+  "reports": [
+    [
+      16593001844,
+      1659300184,
+      4,
+      83.23,
+      40.79
+    ],
+    ...
+    ]
+}
+```
+
+and convert it to
+```
+[
+{
+	"borderColor":"blue",
+	"data":[...],
+	"fill":false,
+	...
+},
+...
+]
+```
+
+From here we can feed it directly into ChartJS.
+
 ## Running the project
 To start the server run the following
 ```
