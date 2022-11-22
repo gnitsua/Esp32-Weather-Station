@@ -24,8 +24,8 @@
 //#define SCL1 25
 
 // Wifi config
-const char* ssid       = "the_overlook";
-const char* password   = "Apartment52Bravo";
+const char* ssid       = "";
+const char* password   = "";
 
 // Time setup (from example
 const char* ntpServer1 = "pool.ntp.org";
